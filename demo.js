@@ -38,7 +38,8 @@ $(document).ready(function(){
         draggable: false,
         touchMove: false,
         slidesToShow: 1,
-        slidesToScroll: 1
+        slidesToScroll: 1,
+        swipe: false
     });
 });
 
