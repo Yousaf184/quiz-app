@@ -74,13 +74,12 @@ if ('SpeechRecognition' in window) {
             wrongTries = 0;
 
             tryAgainText.style.display = 'none';
-
-            shouldQuizEnd();
         }
         else {
             wrongTries++;
 
-            if (wrongTries === 2) {
+            if (wrongTries === 3) {
+                alert('Correct answer: ' + images[currentImageIndex]);
                 $('.quiz-container').slick('slickNext');
                 wrongAnswersCountElem.textContent = `Wrong Answers = ${++countWrongAnswers}`;
                 wrongTries = 0;
@@ -89,11 +88,10 @@ if ('SpeechRecognition' in window) {
             } else {
                 tryAgainText.style.display = 'block';
             }
-
-            shouldQuizEnd();
         }
 
         speechArrayIndex++;
+        shouldQuizEnd();
     }
 
     recognition.start();
