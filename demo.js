@@ -63,7 +63,9 @@ if ('SpeechRecognition' in window) {
     recognition.onresult = (event) => {
         const speechToText = event.results[speechArrayIndex][0].transcript;
 
-        if (speechToText.toLowerCase().trim() === images[currentImageIndex].toLowerCase().trim()) {
+        const areEqual = speechToText.toLowerCase().trim() === images[currentImageIndex].toLowerCase().trim();
+
+        if (areEqual) {
             $('.quiz-container').slick('slickNext');
 
             correctAnswersCountElem.textContent = `Correct Answers = ${++countCorrectAnswers}`;
@@ -77,7 +79,7 @@ if ('SpeechRecognition' in window) {
 
             tryAgainText.style.display = 'none';
         }
-        else {
+        else if (!areEqual) {
             wrongTries++;
 
             if (wrongTries === 3) {
