@@ -56,7 +56,6 @@ let recognition = null;
 if ('SpeechRecognition' in window) {
 
     recognition = new window.SpeechRecognition();
-
     recognition.continuous = true;
 
     recognition.onresult = (event) => {
@@ -94,6 +93,18 @@ if ('SpeechRecognition' in window) {
         speechArrayIndex++;
         shouldQuizEnd();
     }
+
+    recognition.onstart = (event) => {
+        // in case speech rcognition service starts again after end event call,
+        // set reset the "speechArrayIndex" to zero again
+        speechArrayIndex = 0;
+    };
+
+    recognition.onend = (event) => {
+        // restart speech recognition service in case it ends
+        // to prevent it from stop listening
+        recognition.start();
+    };
 
     recognition.start();
 } else {
