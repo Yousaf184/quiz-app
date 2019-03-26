@@ -5,6 +5,8 @@ const resultPercentageElem = document.getElementsByClassName('resultInPercentage
 const tryAgainText = document.getElementsByClassName('tryAgainText')[0];
 const restartQuizBtn = document.getElementsByTagName('button')[0];
 
+let shouldStopListening = false;
+
 let countCorrectAnswers = 0;
 let countWrongAnswers = 0;
 let countCurrentImage = 1;
@@ -103,7 +105,9 @@ if ('SpeechRecognition' in window) {
     recognition.onend = (event) => {
         // restart speech recognition service in case it ends
         // to prevent it from stop listening
-        recognition.start();
+        if (!shouldStopListening) {
+            recognition.start();
+        }
     };
 
     recognition.start();
@@ -123,6 +127,7 @@ function shouldQuizEnd() {
 
         restartQuizBtn.style.display = 'inline-block';
 
-        recognition.stop()
+        shouldStopListening = true;
+        recognition.stop();
     }
 }
