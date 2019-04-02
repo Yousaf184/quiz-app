@@ -1,10 +1,10 @@
-.quiz-container {
+.quiz-images-container {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.quiz-container div {
+.quiz-images-container div {
     width: 60%;
     text-align: center;
     padding: 10px;
@@ -14,7 +14,7 @@
     align-items: center;
 }
 
-.quiz-container img {
+.quiz-images-container img {
     width: 100%;
 }
 

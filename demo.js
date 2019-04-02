@@ -4,26 +4,22 @@ const currentImageCountElem = document.getElementsByClassName('totalImagesCount'
 const resultPercentageElem = document.getElementsByClassName('resultInPercentage')[0];
 const tryAgainText = document.getElementsByClassName('tryAgainText')[0];
 const restartQuizBtn = document.getElementsByTagName('button')[0];
+const quizImagesContainer = document.getElementsByClassName('quiz-images-container')[0];
 
-let shouldStopListening = false;
-
-let countCorrectAnswers = 0;
-let countWrongAnswers = 0;
-let countCurrentImage = 1;
-
-const totalNumberOfImages = 4;
-let currentImageIndex = 0;
 let images = ['elephant', 'horse', 'giraffe', 'dog'];
 images = shuffleArray(images);
 
-const imageTags = document.querySelectorAll('img');
+let divTag, imageTag;
 
-imageTags.forEach(imgTag => {
-    imgTag.setAttribute('src', `./img/${images[currentImageIndex]}.jpg`);
-    currentImageIndex++;
+images.forEach(img => {
+    divTag = document.createElement('div');
+
+    imageTag = document.createElement('img');
+    imageTag.setAttribute('src', `./img/${img}.jpg`);
+
+    divTag.appendChild(imageTag);
+    quizImagesContainer.appendChild(divTag);
 });
-
-currentImageIndex = 0;
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -35,7 +31,7 @@ function shuffleArray(array) {
 }
 
 $(document).ready(function(){
-    $('.quiz-container').slick({
+    $('.quiz-images-container').slick({
         arrows: false,
         draggable: false,
         touchMove: false,
@@ -51,8 +47,17 @@ restartQuizBtn.addEventListener('click', () => {
 
 window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
 
+let shouldStopListening = false;
+
+const totalNumberOfImages = images.length;
+
+let countCorrectAnswers = 0;
+let countWrongAnswers = 0;
+let countCurrentImage = 1;
+let currentImageIndex = 0;
 let speechArrayIndex = 0;
 let wrongTries = 0;
+
 let recognition = null;
 
 if ('SpeechRecognition' in window) {
@@ -66,13 +71,10 @@ if ('SpeechRecognition' in window) {
         const areEqual = speechToText.toLowerCase().trim() === images[currentImageIndex].toLowerCase().trim();
 
         if (areEqual) {
-            $('.quiz-container').slick('slickNext');
+            $('.quiz-images-container').slick('slickNext');
 
             correctAnswersCountElem.textContent = `Correct Answers = ${++countCorrectAnswers}`;
-
-            if (countCurrentImage < totalNumberOfImages) {
-                currentImageCountElem.textContent = `Image: ${++countCurrentImage}/${totalNumberOfImages}`;
-            }
+            currentImageCountElem.textContent = `Image: ${++countCurrentImage}/${totalNumberOfImages}`;
 
             currentImageIndex++;
             wrongTries = 0;
@@ -83,12 +85,17 @@ if ('SpeechRecognition' in window) {
             wrongTries++;
 
             if (wrongTries === 3) {
+                tryAgainText.style.display = 'none';
+
                 alert('Correct answer: ' + images[currentImageIndex]);
-                $('.quiz-container').slick('slickNext');
+
+                $('.quiz-images-container').slick('slickNext');
+
                 wrongAnswersCountElem.textContent = `Wrong Answers = ${++countWrongAnswers}`;
+                currentImageCountElem.textContent = `Image: ${++countCurrentImage}/${totalNumberOfImages}`;
+
                 wrongTries = 0;
                 currentImageIndex++;
-                tryAgainText.style.display = 'none';
             } else {
                 tryAgainText.style.display = 'block';
             }
@@ -102,6 +109,10 @@ if ('SpeechRecognition' in window) {
         // in case speech rcognition service starts again after end event call,
         // set reset the "speechArrayIndex" to zero again
         speechArrayIndex = 0;
+    };
+
+    recognition.onnomatch = (event) => {
+        console.log('no match event fired');
     };
 
     recognition.onend = (event) => {
@@ -122,7 +133,7 @@ function shouldQuizEnd() {
         $('quiz-container').slick('unslick');
 
         currentImageCountElem.style.display = 'none';
-        document.getElementsByClassName('quiz-container')[0].style.display = 'none';
+        quizImagesContainer.style.display = 'none';
 
         resultPercentageElem.textContent = `Result = ${(countCorrectAnswers / totalNumberOfImages) * 100}%`;
         resultPercentageElem.style.display = 'inline-block';
