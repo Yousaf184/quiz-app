@@ -1,3 +1,5 @@
+(function () {
+
 const correctAnswersCountElem = document.getElementsByClassName('correctAnswersCount')[0];
 const wrongAnswersCountElem = document.getElementsByClassName('wrongAnswersCount')[0];
 const currentImageCountElem = document.getElementsByClassName('totalImagesCount')[0];
@@ -5,32 +7,37 @@ const resultPercentageElem = document.getElementsByClassName('resultInPercentage
 const tryAgainText = document.getElementsByClassName('tryAgainText')[0];
 const restartQuizBtn = document.getElementsByTagName('button')[0];
 const quizImagesContainer = document.getElementsByClassName('quiz-images-container')[0];
+const optionsContainer = document.getElementsByClassName('options')[0];
 
-let images = ['elephant', 'horse', 'giraffe', 'dog'];
+let images = [
+    {name: 'elephant.jpg', correctAnswer: 'Elephant'},
+    {name: 'horse.jpg', correctAnswer: 'Horse'},
+    {name: 'giraffe.jpg', correctAnswer: 'Giraffe'},
+    {name: 'dog.jpg', correctAnswer: 'Dog'}
+];
+
+let allOptions = [];
+images.forEach(image => allOptions.push(image.correctAnswer));
+
 images = shuffleArray(images);
 
 let divTag, imageTag;
+images.forEach(image => {
+    image.altOptions = getAltOptions(allOptions, image.correctAnswer);
 
-images.forEach(img => {
     divTag = document.createElement('div');
 
     imageTag = document.createElement('img');
-    imageTag.setAttribute('src', `./img/${img}.jpg`);
+    imageTag.setAttribute('src', `./img/${image.name}`);
 
     divTag.appendChild(imageTag);
     quizImagesContainer.appendChild(divTag);
 });
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
+//display first image options
+displayImageOptions(images[0]);
 
-    return array;
-}
-
-$(document).ready(function(){
+$(document).ready(function() {
     $('.quiz-images-container').slick({
         arrows: false,
         draggable: false,
@@ -47,9 +54,9 @@ restartQuizBtn.addEventListener('click', () => {
 
 window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
 
-let shouldStopListening = false;
-
 const totalNumberOfImages = images.length;
+
+let shouldStopListening = false;
 
 let countCorrectAnswers = 0;
 let countWrongAnswers = 0;
@@ -64,11 +71,11 @@ if ('SpeechRecognition' in window) {
 
     recognition = new window.SpeechRecognition();
     recognition.continuous = true;
+    recognition.maxAlternatives = 1;
 
     recognition.onresult = (event) => {
         const speechToText = event.results[speechArrayIndex][0].transcript;
-
-        const areEqual = speechToText.toLowerCase().trim() === images[currentImageIndex].toLowerCase().trim();
+        const areEqual = speechToText.toLowerCase().trim() === images[currentImageIndex].correctAnswer.toLowerCase().trim();
 
         if (areEqual) {
             $('.quiz-images-container').slick('slickNext');
@@ -80,6 +87,7 @@ if ('SpeechRecognition' in window) {
             wrongTries = 0;
 
             tryAgainText.style.display = 'none';
+
         }
         else if (!areEqual) {
             wrongTries++;
@@ -87,7 +95,7 @@ if ('SpeechRecognition' in window) {
             if (wrongTries === 3) {
                 tryAgainText.style.display = 'none';
 
-                alert('Correct answer: ' + images[currentImageIndex]);
+                alert('Correct answer: ' + images[currentImageIndex].correctAnswer);
 
                 $('.quiz-images-container').slick('slickNext');
 
@@ -103,16 +111,16 @@ if ('SpeechRecognition' in window) {
 
         speechArrayIndex++;
         shouldQuizEnd();
+
+        if (currentImageIndex < images.length) {
+            displayImageOptions(images[currentImageIndex]);
+        }
     }
 
     recognition.onstart = (event) => {
         // in case speech rcognition service starts again after end event call,
         // set reset the "speechArrayIndex" to zero again
         speechArrayIndex = 0;
-    };
-
-    recognition.onnomatch = (event) => {
-        console.log('no match event fired');
     };
 
     recognition.onend = (event) => {
@@ -134,6 +142,7 @@ function shouldQuizEnd() {
 
         currentImageCountElem.style.display = 'none';
         quizImagesContainer.style.display = 'none';
+        optionsContainer.style.display = 'none';
 
         resultPercentageElem.textContent = `Result = ${(countCorrectAnswers / totalNumberOfImages) * 100}%`;
         resultPercentageElem.style.display = 'inline-block';
@@ -144,3 +153,52 @@ function shouldQuizEnd() {
         recognition.stop();
     }
 }
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    return array;
+}
+
+function displayImageOptions(image) {
+    const options = shuffleArray([image.correctAnswer, ...image.altOptions]);
+    const childrenArr = Array.from(optionsContainer.children);
+
+    childrenArr.forEach((child, index) => {
+        if (child.tagName === 'LI') {
+            child.textContent = options[index - 1];
+        }
+    });
+}
+
+function getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+
+// returns random alternative wrong options
+// chooses random options from the options array after excluding the correct option for a given array
+function getAltOptions(optionsArr, correctOption) {
+    const randomOptionsArr = [];
+
+    // filter options array to exclude correctOption so that randomly chosen options
+    // don't include correct answer for given image
+    const filteredOptionsArr = optionsArr.filter(option => option.toLowerCase() !== correctOption.toLowerCase());
+
+    // chose random alt options from filteredOptionsArr
+    const randomNum1 = getRandomNumber(0, filteredOptionsArr.length);
+    let randomNum2 = getRandomNumber(0, filteredOptionsArr.length);
+
+    while (randomNum2 === randomNum1) {
+        randomNum2 = getRandomNumber(0, filteredOptionsArr.length);
+    }
+
+    randomOptionsArr.push(filteredOptionsArr[randomNum1]);
+    randomOptionsArr.push(filteredOptionsArr[randomNum2]);
+
+    return randomOptionsArr;
+}
+
+})();
