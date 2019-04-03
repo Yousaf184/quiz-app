@@ -68,6 +68,12 @@ restartQuizBtn.addEventListener('click', () => {
     window.location.reload();
 });
 
+optionsContainer.addEventListener('click', (e) => {
+    if (e.target.tagName === 'IMG') {
+        speakWord(e.target.parentElement.textContent);
+    }
+});
+
 window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
 
 const totalNumberOfImages = images.length;
@@ -187,7 +193,7 @@ function displayImageOptions(image) {
 
     childrenArr.forEach((child, index) => {
         if (child.tagName === 'LI') {
-            child.textContent = options[index - 1];
+            child.innerHTML = options[index - 1] + '<img src="./ic_speak.png" alt="speaker icon">';
         }
     });
 }
@@ -217,6 +223,12 @@ function getAltOptions(optionsArr, correctOption) {
     randomOptionsArr.push(filteredOptionsArr[randomNum2]);
 
     return randomOptionsArr;
+}
+
+function speakWord(text) {
+    const message = new SpeechSynthesisUtterance(text);
+    message.lang = 'en-US';
+    window.speechSynthesis.speak(message);
 }
 
 })();

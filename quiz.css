@@ -63,6 +63,14 @@ nav h1 {
 
 .options li {
     padding: 5px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.options li img {
+    width: 18px;
+    margin: 0 0 0 10px;
 }
 
 button {
