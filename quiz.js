@@ -83,6 +83,8 @@ let wrongTries = 0;
 
 let recognition = null;
 
+currentImageCountElem.textContent = `Image: ${countCurrentImage}/${totalNumberOfImages}`;
+
 if ('SpeechRecognition' in window) {
 
     recognition = new window.SpeechRecognition();
