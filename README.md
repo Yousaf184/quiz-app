@@ -1,2 +1,2 @@
-# animal-recognition-app-demo
-App that allows users to recognize animal images using their voice
+# quiz-image-recognition-app
+App that allows users to recognize images using their voice
