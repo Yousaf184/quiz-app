@@ -244,13 +244,25 @@ function shuffleArray(array) {
 
 function displayImageOptions(image) {
     const options = shuffleArray([image.correctAnswer, ...image.altOptions]);
+
+    getOptionListItems().forEach((liItem, index) => {
+        liItem.innerHTML = options[index] + '<img src="./ic_speak.png" alt="speaker icon">';
+    });
+}
+
+// returns li tags in an array
+// li tags are used to display options
+function getOptionListItems() {
+    const liTagsArr = [];
     const childrenArr = Array.from(optionsContainer.children);
 
-    childrenArr.forEach((child, index) => {
+    childrenArr.forEach((child) => {
         if (child.tagName === 'LI') {
-            child.innerHTML = options[index - 1] + '<img src="./ic_speak.png" alt="speaker icon">';
+            liTagsArr.push(child);
         }
     });
+
+    return liTagsArr;
 }
 
 function getRandomNumber(min, max) {
