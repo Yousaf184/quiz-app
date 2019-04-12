@@ -77,6 +77,7 @@ nav button.settings-btn {
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 20px;
 }
 
 .options li img {
@@ -132,10 +133,10 @@ p.resultInPercentage {
     display: none;
 }
 
-p.tryAgainText {
+p.info-text {
     display: none;
     animation: blink 1.5s linear 0s infinite alternate;
-    font-size: 22px;
+    font-size: 17px;
     color: red;
     text-align: center;
 }

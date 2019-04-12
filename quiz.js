@@ -4,7 +4,7 @@ const correctAnswersCountElem = document.getElementsByClassName('correctAnswersC
 const wrongAnswersCountElem = document.getElementsByClassName('wrongAnswersCount')[0];
 const currentImageCountElem = document.getElementsByClassName('totalImagesCount')[0];
 const resultPercentageElem = document.getElementsByClassName('resultInPercentage')[0];
-const tryAgainText = document.getElementsByClassName('tryAgainText')[0];
+const infoText = document.getElementsByClassName('info-text')[0];
 const restartQuizBtn = document.getElementsByClassName('restart-quiz-btn')[0];
 const quizImagesContainer = document.getElementsByClassName('quiz-images-container')[0];
 const optionsContainer = document.getElementsByClassName('options')[0];
@@ -120,6 +120,12 @@ let countCurrentImage = 1;
 let currentImageIndex = 0;
 let wrongTries = 0;
 
+// regex to test whether complete word was spoken
+// or word spellings were spoken
+// if spellings are spoken, speech recognition will
+// return result with space added between each letter
+const regex = /^[A-Za-z](\s[A-Za-z])+$/;
+
 let recognition = null;
 
 currentImageCountElem.textContent = `Image: ${countCurrentImage}/${totalNumberOfImages}`;
@@ -132,7 +138,23 @@ if ('SpeechRecognition' in window) {
     recognition.onresult = (event) => {
         if (event.results[0].isFinal) {
             let speechToText = event.results[0][0].transcript;
-            speechToText = speechToText.replace(/\s+/g, '').toLowerCase().trim();
+
+            // if regex matches, spellings were spoken instead of complete word
+            if (regex.test(speechToText) && radioBtnCompleteWord.checked) {
+                displayInfoText('speak complete word');
+                return;
+            } else if (!regex.test(speechToText) && !radioBtnCompleteWord.checked) {
+                displayInfoText('speak word spellings');
+                return;
+            }
+
+            hideInfoText();
+
+            // remove spaces between letters if spellings were spoken
+            if (regex.test(speechToText) && !radioBtnCompleteWord.checked) {
+                speechToText = speechToText.replace(/\s+/g, '').toLowerCase().trim();
+            }
+
             const areEqual = speechToText === images[currentImageIndex].correctAnswer.toLowerCase().trim();
 
             if (areEqual) {
@@ -144,14 +166,13 @@ if ('SpeechRecognition' in window) {
                 currentImageIndex++;
                 wrongTries = 0;
 
-                tryAgainText.style.display = 'none';
-
+                hideInfoText();
             }
             else if (!areEqual) {
                 wrongTries++;
 
                 if (wrongTries === 3) {
-                    tryAgainText.style.display = 'none';
+                    hideInfoText();
 
                     alert('Correct answer: ' + images[currentImageIndex].correctAnswer);
 
@@ -163,7 +184,7 @@ if ('SpeechRecognition' in window) {
                     wrongTries = 0;
                     currentImageIndex++;
                 } else {
-                    tryAgainText.style.display = 'block';
+                    displayInfoText('try again')
                 }
             }
 
@@ -234,6 +255,15 @@ function displayImageOptions(image) {
 
 function getRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function displayInfoText(text) {
+    infoText.textContent = text;
+    infoText.style.display = 'block';
+}
+
+function hideInfoText() {
+    infoText.style.display = 'none';
 }
 
 // returns random alternative wrong options
