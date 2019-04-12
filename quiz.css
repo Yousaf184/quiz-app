@@ -1,5 +1,6 @@
 body {
     margin: 0;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 nav {
@@ -7,11 +8,21 @@ nav {
     padding: 20px 5px;
     text-align: center;
     color: #fff;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-family: inherit;
+    position: relative;
 }
 
 nav h1 {
     margin: 0;
+}
+
+nav button.settings-btn {
+    font-size: 15px;
+    padding: 10px;
+    width: 100px;
+    position: absolute;
+    right: 10px;
+    top: -5px;
 }
 
 .quiz-images-container {
@@ -71,6 +82,7 @@ nav h1 {
 .options li img {
     width: 18px;
     margin: 0 0 0 10px;
+    cursor: pointer;
 }
 
 button {
@@ -84,6 +96,9 @@ button {
     border-radius: 4px;
     border: 1px solid teal;
     margin: 20px 5px 5px 5px;
+}
+
+.restart-quiz-btn {
     display: none;
 }
 
@@ -128,6 +143,85 @@ p.tryAgainText {
 @keyframes blink {
     from { opacity: 1; }
     to { opacity: 0; }
+}
+
+
+/*************************
+          Modal
+**************************/
+.modal-container-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+.display-modal {
+    display: flex;
+}
+
+.modal {
+    background-color: #fff;
+    width: 80%;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0.3px 0.3px 5px rgba(0, 0, 0, 0.3), -0.3px -0.3px 5px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: slideDown 0.3s ease-out 0s 1 normal;
+}
+
+@keyframes slideDown {
+    from { margin-top: -200px; opacity: 0; }
+    to { margin-top: 0; opacity: 1; }
+}
+
+.modal-close-btn {
+    position: absolute;
+    right: 25px;
+    font-size: 18px;
+    top: 30px;
+    cursor: pointer;
+}
+
+.modal h1 {
+    text-align: center;
+    margin: 0;
+    padding: 0 0 15px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.modal h2 {
+    margin: 0;
+    padding: 15px 0 15px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.modal .radio-btns-container {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+}
+
+.modal input {
+    cursor: pointer;
+}
+
+.modal label {
+    cursor: pointer;
+}
+
+.modal .speech-speed-container select {
+    font-size: 17px;
+    width: 200px;
+    margin: 10px 0 10px 0;
 }
 
 @media (max-width: 800px) {

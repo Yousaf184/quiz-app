@@ -5,9 +5,26 @@ const wrongAnswersCountElem = document.getElementsByClassName('wrongAnswersCount
 const currentImageCountElem = document.getElementsByClassName('totalImagesCount')[0];
 const resultPercentageElem = document.getElementsByClassName('resultInPercentage')[0];
 const tryAgainText = document.getElementsByClassName('tryAgainText')[0];
-const restartQuizBtn = document.getElementsByTagName('button')[0];
+const restartQuizBtn = document.getElementsByClassName('restart-quiz-btn')[0];
 const quizImagesContainer = document.getElementsByClassName('quiz-images-container')[0];
 const optionsContainer = document.getElementsByClassName('options')[0];
+const settingsBtn = document.getElementsByClassName('settings-btn')[0];
+const modalContainer = document.getElementsByClassName('modal-container-backdrop')[0];
+const radioBtnCompleteWord = document.getElementById('radio-btn-complete-word');
+const speechspeedOptions = document.getElementsByTagName('select')[0];
+
+const speechSpeeds = {
+    slow: 0.6,
+    medium: 1,
+    fast: 1.5
+};
+
+let speechSpeed = speechSpeeds.medium;
+
+// true when computer is speaking the word or its spellings
+// will be used to block user from trying to listen to another option
+// while computer is speaking
+let currentlySpeaking = false;
 
 let images = [
     {name: 'eagle.jpg', correctAnswer: 'Eagle'},
@@ -69,9 +86,26 @@ restartQuizBtn.addEventListener('click', () => {
 });
 
 optionsContainer.addEventListener('click', (e) => {
-    if (e.target.tagName === 'IMG') {
-        speakWord(e.target.parentElement.textContent);
+    if (e.target.tagName === 'IMG' && !currentlySpeaking) {
+        // speak complete word
+        if (radioBtnCompleteWord.checked) {
+            speakWord(e.target.parentElement.textContent);
+        } else {
+            // speak spellings
+            const letters = e.target.parentElement.textContent.replace(' ', '').split('');
+            speakWord(letters);
+        }
     }
+});
+
+settingsBtn.addEventListener('click', () => {
+    modalContainer.classList.add('display-modal');
+});
+
+modalContainer.addEventListener('click', hideModal);
+
+speechspeedOptions.addEventListener('change', (e) => {
+    speechSpeed = speechSpeeds[e.target.value];
 });
 
 window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
@@ -84,7 +118,6 @@ let countCorrectAnswers = 0;
 let countWrongAnswers = 0;
 let countCurrentImage = 1;
 let currentImageIndex = 0;
-let speechArrayIndex = 0;
 let wrongTries = 0;
 
 let recognition = null;
@@ -94,58 +127,53 @@ currentImageCountElem.textContent = `Image: ${countCurrentImage}/${totalNumberOf
 if ('SpeechRecognition' in window) {
 
     recognition = new window.SpeechRecognition();
-    recognition.continuous = true;
-    recognition.maxAlternatives = 1;
+    recognition.interimResults = true;
 
     recognition.onresult = (event) => {
-        const speechToText = event.results[speechArrayIndex][0].transcript;
-        const areEqual = speechToText.toLowerCase().trim() === images[currentImageIndex].correctAnswer.toLowerCase().trim();
+        if (event.results[0].isFinal) {
+            let speechToText = event.results[0][0].transcript;
+            speechToText = speechToText.replace(/\s+/g, '').toLowerCase().trim();
+            const areEqual = speechToText === images[currentImageIndex].correctAnswer.toLowerCase().trim();
 
-        if (areEqual) {
-            $('.quiz-images-container').slick('slickNext');
-
-            correctAnswersCountElem.textContent = `Correct Answers = ${++countCorrectAnswers}`;
-            currentImageCountElem.textContent = `Image: ${++countCurrentImage}/${totalNumberOfImages}`;
-
-            currentImageIndex++;
-            wrongTries = 0;
-
-            tryAgainText.style.display = 'none';
-
-        }
-        else if (!areEqual) {
-            wrongTries++;
-
-            if (wrongTries === 3) {
-                tryAgainText.style.display = 'none';
-
-                alert('Correct answer: ' + images[currentImageIndex].correctAnswer);
-
+            if (areEqual) {
                 $('.quiz-images-container').slick('slickNext');
 
-                wrongAnswersCountElem.textContent = `Wrong Answers = ${++countWrongAnswers}`;
+                correctAnswersCountElem.textContent = `Correct Answers = ${++countCorrectAnswers}`;
                 currentImageCountElem.textContent = `Image: ${++countCurrentImage}/${totalNumberOfImages}`;
 
-                wrongTries = 0;
                 currentImageIndex++;
-            } else {
-                tryAgainText.style.display = 'block';
+                wrongTries = 0;
+
+                tryAgainText.style.display = 'none';
+
+            }
+            else if (!areEqual) {
+                wrongTries++;
+
+                if (wrongTries === 3) {
+                    tryAgainText.style.display = 'none';
+
+                    alert('Correct answer: ' + images[currentImageIndex].correctAnswer);
+
+                    $('.quiz-images-container').slick('slickNext');
+
+                    wrongAnswersCountElem.textContent = `Wrong Answers = ${++countWrongAnswers}`;
+                    currentImageCountElem.textContent = `Image: ${++countCurrentImage}/${totalNumberOfImages}`;
+
+                    wrongTries = 0;
+                    currentImageIndex++;
+                } else {
+                    tryAgainText.style.display = 'block';
+                }
+            }
+
+            shouldQuizEnd();
+
+            if (currentImageIndex < images.length) {
+                displayImageOptions(images[currentImageIndex]);
             }
         }
-
-        speechArrayIndex++;
-        shouldQuizEnd();
-
-        if (currentImageIndex < images.length) {
-            displayImageOptions(images[currentImageIndex]);
-        }
     }
-
-    recognition.onstart = (event) => {
-        // in case speech rcognition service starts again after end event call,
-        // set reset the "speechArrayIndex" to zero again
-        speechArrayIndex = 0;
-    };
 
     recognition.onend = (event) => {
         // restart speech recognition service in case it ends
@@ -158,6 +186,12 @@ if ('SpeechRecognition' in window) {
     recognition.start();
 } else {
     alert('Speech recognition not supported in your browser');
+}
+
+function hideModal(e) {
+    if (e.target === modalContainer || e.target.classList.contains('modal-close-btn')) {
+        modalContainer.classList.remove('display-modal');
+    }
 }
 
 function shouldQuizEnd() {
@@ -225,10 +259,41 @@ function getAltOptions(optionsArr, correctOption) {
     return randomOptionsArr;
 }
 
-function speakWord(text) {
-    const message = new SpeechSynthesisUtterance(text);
-    message.lang = 'en-US';
-    window.speechSynthesis.speak(message);
+const textToSpeech = new SpeechSynthesisUtterance();
+textToSpeech.lang = 'en-US';
+textToSpeech.addEventListener('end', () => {
+    // when text to speech is done, restart the
+    // speech recognition api
+    shouldStopListening = false;
+
+    // if start method is called when recognition is already
+    // started, exception is thrown
+    // try-catch block is added to prevent website from not
+    // working correctly when exception is thrown
+    try {
+        recognition.start();
+    } catch (ex) {
+        console.log(ex.message);
+    }
+
+    currentlySpeaking = false;
+});
+
+// if word is an array, its spellings will be spoken, letter by letter
+// instead of speaking complete word
+// if word is a string, complete word will be spoken
+function speakWord(word) {
+    currentlySpeaking = true;
+
+    // speech recognition should stop listening when
+    // text is being spoken as speech by the computer
+    shouldStopListening = true;
+    recognition.stop();
+
+    textToSpeech.text = word;
+    textToSpeech.rate = speechSpeed;
+
+    window.speechSynthesis.speak(textToSpeech);
 }
 
 })();
