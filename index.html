@@ -13,7 +13,37 @@
 
   <nav>
     <h1>Recognize images using your voice</h1>
+    <button class="settings-btn">Settings</button>
   </nav>
+
+  <div class="modal-container-backdrop">
+    <div class="modal">
+      <span class="modal-close-btn">x</span>
+      <h1>Settings</h1>
+
+      <h2>How do you want me to speak each option?</h2>
+      <div class="radio-btns-container">
+        <div>
+          <input type="radio" id="radio-btn-complete-word" name="speak-word" checked />
+          <label for="radio-btn-complete-word">Speak Complete Word</label>
+        </div>
+        <div>
+          <input type="radio" id="radio-btn-word-spellings" name="speak-word" />
+          <label for="radio-btn-word-spellings">Speak Word Spellings</label>
+        </div>
+      </div>
+
+      <h2>How fast should i speak the options?</h2>
+      <div class="speech-speed-container">
+        <select>
+          <option value="slow">Slow</option>
+          <option selected value="medium">Medium</option>
+          <option value="fast">Fast</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
 
   <div class="quiz-images-container"></div>
 
@@ -29,11 +59,10 @@
     <p class="correctAnswersCount">Correct answers = 0</p>
     <p class="wrongAnswersCount">Wrong answers = 0</p>
     <p class="resultInPercentage">Result = 100%</p>
-    <button>Restart Quiz</button>
+    <button class="restart-quiz-btn">Restart Quiz</button>
   </div>
 
   <p class="tryAgainText">Try again...</p>
-
 
   <!--jQuery CDN-->
   <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
