@@ -230,3 +230,72 @@ p.info-text {
         width: 100%;
     }
 }
+
+@media (max-width: 730px) {
+    nav h1 {
+        font-size: 20px;
+    }
+
+    nav button.settings-btn {
+        font-size: 14px;
+        padding: 8px;
+        top: -5px;
+    }
+}
+
+@media (max-width: 660px) {
+    nav h1 {
+        font-size: 18px;
+    }
+
+    nav button.settings-btn {
+        font-size: 13px;
+        padding: 7px;
+        top: -5px;
+    }
+}
+
+@media (max-width: 610px) {
+    nav h1 {
+        text-align: left;
+    }
+
+    nav {
+        padding-left: 16px;
+    }
+}
+
+@media (max-width: 495px) {
+    nav h1 {
+        font-size: 16px;
+    }
+
+    nav button.settings-btn {
+        font-size: 12px;
+        padding: 5px;
+        width: 70px;
+    }
+}
+
+@media (max-width: 430px) {
+    nav h1 {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 390px) {
+    nav h1 {
+        text-align: center;
+    }
+
+    nav button.settings-btn {
+        position: static;
+    }
+}
+
+@media (max-width: 325px) {
+    .options {
+        width: 250px;
+    }
+}
+

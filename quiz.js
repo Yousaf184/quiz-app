@@ -19,7 +19,7 @@ const speechSpeeds = {
     fast: 1.5
 };
 
-let speechSpeed = speechSpeeds.medium;
+let speechSpeed = speechSpeeds.slow;
 
 // true when computer is speaking the word or its spellings
 // will be used to block user from trying to listen to another option
