@@ -10,7 +10,6 @@ const quizImagesContainer = document.getElementsByClassName('quiz-images-contain
 const optionsContainer = document.getElementsByClassName('options')[0];
 const settingsBtn = document.getElementsByClassName('settings-btn')[0];
 const modalContainer = document.getElementsByClassName('modal-container-backdrop')[0];
-const radioBtnCompleteWord = document.getElementById('radio-btn-complete-word');
 const speechspeedOptions = document.getElementsByTagName('select')[0];
 
 const speechSpeeds = {
@@ -87,14 +86,7 @@ restartQuizBtn.addEventListener('click', () => {
 
 optionsContainer.addEventListener('click', (e) => {
     if (e.target.tagName === 'IMG' && !currentlySpeaking) {
-        // speak complete word
-        if (radioBtnCompleteWord.checked) {
-            speakWord(e.target.parentElement.textContent);
-        } else {
-            // speak spellings
-            const letters = e.target.parentElement.textContent.replace(' ', '').split('');
-            speakWord(letters);
-        }
+        speakWord(e.target.parentElement.textContent);
     }
 });
 
@@ -120,12 +112,6 @@ let countCurrentImage = 1;
 let currentImageIndex = 0;
 let wrongTries = 0;
 
-// regex to test whether complete word was spoken
-// or word spellings were spoken
-// if spellings are spoken, speech recognition will
-// return result with space added between each letter
-const regex = /^[A-Za-z](\s[A-Za-z])+$/;
-
 let recognition = null;
 
 currentImageCountElem.textContent = `Image: ${countCurrentImage}/${totalNumberOfImages}`;
@@ -133,28 +119,10 @@ currentImageCountElem.textContent = `Image: ${countCurrentImage}/${totalNumberOf
 if ('SpeechRecognition' in window) {
 
     recognition = new window.SpeechRecognition();
-    recognition.interimResults = true;
 
     recognition.onresult = (event) => {
         if (event.results[0].isFinal) {
-            let speechToText = event.results[0][0].transcript;
-
-            // if regex matches, spellings were spoken instead of complete word
-            if (regex.test(speechToText) && radioBtnCompleteWord.checked) {
-                displayInfoText('speak complete word');
-                return;
-            } else if (!regex.test(speechToText) && !radioBtnCompleteWord.checked) {
-                displayInfoText('speak word spellings');
-                return;
-            }
-
-            hideInfoText();
-
-            // remove spaces between letters if spellings were spoken
-            if (regex.test(speechToText) && !radioBtnCompleteWord.checked) {
-                speechToText = speechToText.replace(/\s+/g, '').toLowerCase().trim();
-            }
-
+            let speechToText = event.results[0][0].transcript.toLowerCase().trim();
             const areEqual = speechToText === images[currentImageIndex].correctAnswer.toLowerCase().trim();
 
             if (areEqual) {
@@ -321,9 +289,6 @@ textToSpeech.addEventListener('end', () => {
     currentlySpeaking = false;
 });
 
-// if word is an array, its spellings will be spoken, letter by letter
-// instead of speaking complete word
-// if word is a string, complete word will be spoken
 function speakWord(word) {
     currentlySpeaking = true;
 

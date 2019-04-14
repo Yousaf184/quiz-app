@@ -205,12 +205,6 @@ p.info-text {
     font-weight: 600;
 }
 
-.modal .radio-btns-container {
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-}
-
 .modal input {
     cursor: pointer;
 }
