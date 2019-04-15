@@ -1,21 +1,25 @@
 (function () {
 
-const correctAnswersCountElem = document.getElementsByClassName('correctAnswersCount')[0];
-const wrongAnswersCountElem = document.getElementsByClassName('wrongAnswersCount')[0];
 const currentImageCountElem = document.getElementsByClassName('totalImagesCount')[0];
-const resultPercentageElem = document.getElementsByClassName('resultInPercentage')[0];
 const infoText = document.getElementsByClassName('info-text')[0];
-const restartQuizBtn = document.getElementsByClassName('restart-quiz-btn')[0];
+const restartQuizBtn = document.getElementById('restart-quiz-btn');
 const quizImagesContainer = document.getElementsByClassName('quiz-images-container')[0];
 const optionsContainer = document.getElementsByClassName('options')[0];
 const settingsBtn = document.getElementsByClassName('settings-btn')[0];
 const modalContainer = document.getElementsByClassName('modal-container-backdrop')[0];
 const speechspeedOptions = document.getElementsByTagName('select')[0];
+const userAnswer = document.getElementById('user-answer');
 
 const speechSpeeds = {
     slow: 0.6,
     medium: 1,
     fast: 1.5
+};
+
+const quizInfo = {
+    currentImageCount: 1,
+    correctAnswersCount: 0,
+    wrongAnswersCount: 0
 };
 
 let speechSpeed = speechSpeeds.slow;
@@ -103,18 +107,13 @@ speechspeedOptions.addEventListener('change', (e) => {
 window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
 
 const totalNumberOfImages = images.length;
-
 let shouldStopListening = false;
-
-let countCorrectAnswers = 0;
-let countWrongAnswers = 0;
-let countCurrentImage = 1;
 let currentImageIndex = 0;
 let wrongTries = 0;
 
 let recognition = null;
 
-currentImageCountElem.textContent = `Image: ${countCurrentImage}/${totalNumberOfImages}`;
+currentImageCountElem.textContent = `Image: ${quizInfo.currentImageCount}/${totalNumberOfImages}`;
 
 if ('SpeechRecognition' in window) {
 
@@ -125,41 +124,57 @@ if ('SpeechRecognition' in window) {
             let speechToText = event.results[0][0].transcript.toLowerCase().trim();
             const areEqual = speechToText === images[currentImageIndex].correctAnswer.toLowerCase().trim();
 
+            userAnswer.innerHTML = `<img src="./icons/ic_speech.png" alt="speech icon"> ${speechToText}`;
+
             if (areEqual) {
-                $('.quiz-images-container').slick('slickNext');
-
-                correctAnswersCountElem.textContent = `Correct Answers = ${++countCorrectAnswers}`;
-                currentImageCountElem.textContent = `Image: ${++countCurrentImage}/${totalNumberOfImages}`;
-
-                currentImageIndex++;
-                wrongTries = 0;
-
                 hideInfoText();
+                userAnswer.classList.add('display-user-answer');
+                correctUserAnswer();
+
+                setTimeout(() => {
+                    userAnswer.classList.remove('display-user-answer');
+                    $('.quiz-images-container').slick('slickNext');
+                    incrementImagCount();
+
+                    quizInfo.correctAnswersCount += 1;
+
+                    currentImageIndex++;
+
+                    if (currentImageIndex < images.length) {
+                        displayImageOptions(images[currentImageIndex]);
+                    }
+
+                    wrongTries = 0;
+                    shouldQuizEnd();
+                }, 2000);
             }
             else if (!areEqual) {
+                wrongUserAnswer();
+                userAnswer.classList.add('display-user-answer');
                 wrongTries++;
 
                 if (wrongTries === 3) {
                     hideInfoText();
+                    userAnswer.classList.remove('display-user-answer');
 
                     alert('Correct answer: ' + images[currentImageIndex].correctAnswer);
 
                     $('.quiz-images-container').slick('slickNext');
+                    incrementImagCount();
 
-                    wrongAnswersCountElem.textContent = `Wrong Answers = ${++countWrongAnswers}`;
-                    currentImageCountElem.textContent = `Image: ${++countCurrentImage}/${totalNumberOfImages}`;
+                    quizInfo.wrongAnswersCount += 1;
 
                     wrongTries = 0;
                     currentImageIndex++;
                 } else {
                     displayInfoText('try again')
                 }
-            }
 
-            shouldQuizEnd();
+                if (currentImageIndex < images.length) {
+                    displayImageOptions(images[currentImageIndex]);
+                }
 
-            if (currentImageIndex < images.length) {
-                displayImageOptions(images[currentImageIndex]);
+                shouldQuizEnd();
             }
         }
     }
@@ -183,6 +198,11 @@ function hideModal(e) {
     }
 }
 
+function incrementImagCount() {
+    quizInfo.currentImageCount += 1;
+    currentImageCountElem.textContent = `Image: ${quizInfo.currentImageCount}/${totalNumberOfImages}`;
+}
+
 function shouldQuizEnd() {
     if (currentImageIndex === totalNumberOfImages) {
         $('quiz-container').slick('unslick');
@@ -191,14 +211,32 @@ function shouldQuizEnd() {
         quizImagesContainer.style.display = 'none';
         optionsContainer.style.display = 'none';
 
-        resultPercentageElem.textContent = `Result = ${(countCorrectAnswers / totalNumberOfImages) * 100}%`;
-        resultPercentageElem.style.display = 'inline-block';
-
-        restartQuizBtn.style.display = 'inline-block';
+        displayQuizResult();
 
         shouldStopListening = true;
         recognition.stop();
     }
+}
+
+function displayQuizResult() {
+    document.getElementById('correctAnswersCount').textContent = 'Correct Answers: ' + quizInfo.correctAnswersCount;
+    document.getElementById('wrongAnswersCount').textContent = 'Wrong Answers: ' + quizInfo.wrongAnswersCount;
+
+    let percentage = (quizInfo.correctAnswersCount / totalNumberOfImages) * 100;
+
+    // if there's a decimal in percentage, format it to
+    // 2 decimal places
+    if (percentage.toString().includes('.')) {
+        percentage = percentage.toFixed(2);
+    }
+
+    const resultPercentage = document.getElementById('resultInPercentage');
+    resultPercentage.textContent = `Result = ${percentage}%`;
+    resultPercentage.style.display = 'inline-block';
+
+    restartQuizBtn.style.display = 'inline-block';
+
+    document.getElementById('info-container').classList.add('show-info-container');
 }
 
 function shuffleArray(array) {
@@ -210,11 +248,21 @@ function shuffleArray(array) {
     return array;
 }
 
+function correctUserAnswer() {
+    userAnswer.classList.remove('wrong-user-answer');
+    userAnswer.classList.add('correct-user-answer');
+}
+
+function wrongUserAnswer() {
+    userAnswer.classList.add('wrong-user-answer');
+    userAnswer.classList.remove('correct-user-answer');
+}
+
 function displayImageOptions(image) {
     const options = shuffleArray([image.correctAnswer, ...image.altOptions]);
 
     getOptionListItems().forEach((liItem, index) => {
-        liItem.innerHTML = options[index] + '<img src="./ic_speak.png" alt="speaker icon">';
+        liItem.innerHTML = options[index] + '<img src="./icons/ic_speak.png">';
     });
 }
 
