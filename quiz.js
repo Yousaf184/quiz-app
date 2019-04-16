@@ -127,6 +127,7 @@ if ('SpeechRecognition' in window) {
             userAnswer.innerHTML = `<img src="./icons/ic_speech.png" alt="speech icon"> ${speechToText}`;
 
             if (areEqual) {
+                playSoundEffect(true);
                 hideInfoText();
                 userAnswer.classList.add('display-user-answer');
                 correctUserAnswer();
@@ -149,6 +150,7 @@ if ('SpeechRecognition' in window) {
                 }, 2000);
             }
             else if (!areEqual) {
+                playSoundEffect(false);
                 wrongUserAnswer();
                 userAnswer.classList.add('display-user-answer');
                 wrongTries++;
@@ -246,6 +248,14 @@ function shuffleArray(array) {
     }
 
     return array;
+}
+
+function playSoundEffect(isAnswerCorrect) {
+    if (isAnswerCorrect) {
+        document.getElementById('correct-answer-sound').play();
+    } else {
+        document.getElementById('wrong-answer-sound').play();
+    }
 }
 
 function correctUserAnswer() {
