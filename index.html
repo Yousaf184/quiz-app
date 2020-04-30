@@ -6,7 +6,6 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
   <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
-  <link rel="stylesheet" href="./quiz.css" />
   <title>Quiz</title>
 </head>
 <body>
@@ -16,6 +15,13 @@
     <button class="settings-btn">Settings</button>
   </nav>
 
+  <div class="startup-modal-backdrop">
+    <div class="startup-modal">
+      <h1>Start Quiz</h1>
+      <button id="start-quiz-btn">Start Quiz</button>
+    </div>
+  </div>
+
   <div class="modal-container-backdrop">
     <div class="modal">
       <span class="modal-close-btn">x</span>
@@ -24,8 +30,8 @@
       <h2>How fast should i speak the options?</h2>
       <div class="speech-speed-container">
         <select>
-          <option selected value="slow">Slow</option>
-          <option value="medium">Medium</option>
+          <option value="slow">Slow</option>
+          <option selected value="medium">Medium</option>
           <option value="fast">Fast</option>
         </select>
       </div>
@@ -47,11 +53,11 @@
   <p id="user-answer" class="user-answer"></p>
 
   <audio id="correct-answer-sound">
-    <source src="./sound/correct-answer.mp3">
+    <source src="./assets/audio/correct-answer.mp3">
   </audio>
 
   <audio id="wrong-answer-sound">
-    <source src="./sound/incorrect-answer.mp3">
+    <source src="./assets/audio/incorrect-answer.mp3">
   </audio>
 
   <div id="info-container" class="info-container">
@@ -63,15 +69,6 @@
 
   <p class="info-text"></p>
 
-  <!--jQuery CDN-->
-  <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-
-  <!--Slick javascript CDN-->
-  <script
-    type="text/javascript"
-    src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js">
-  </script>
-
-  <script src="./quiz.js"></script>
+  <script src="./src/index.js"></script>
 </body>
 </html>
