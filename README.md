@@ -1,2 +1,2 @@
 # quiz-image-recognition-app
-App that allows users to recognize images using their voice
+Quiz app that asks users to identify images by speaking the name of the animal
